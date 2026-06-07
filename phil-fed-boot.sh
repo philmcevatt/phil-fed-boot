@@ -59,6 +59,9 @@ dnf -y install \
   plasma-desktop \
   plasma-login-manager \
   kcm-plasmalogin \
+  firefox \
+  plasma-discover \
+  plasma-discover-flatpak \
   dolphin \
   konsole \
   kate \
@@ -97,7 +100,7 @@ dnf -y swap ffmpeg-free ffmpeg --allowerasing || true
 dnf -y install \
   vlc \
   vlc-plugins-base \
-  vlc-plugins-extra \
+  vlc-plugins-freeworld \
   ffmpeg-libs \
   libva \
   libva-utils \
@@ -137,13 +140,18 @@ dnf -y install \
   p7zip \
   p7zip-plugins \
   unrar || true
+  
+section "Flatpak and Flathub"
+dnf -y install flatpak
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
-section "Try DNF installs for extra apps"
-dnf -y install protonplus || warn "protonplus not available from enabled repos"
-dnf -y install vesktop || warn "vesktop not available from enabled repos"
-dnf -y install localsend || warn "localsend not available from enabled repos"
-
-section "Set fish as shell for ${TARGET_USER}"
+  section "Flatpak apps"
+  flatpak install -y flathub com.vysp3r.ProtonPlus || warn "ProtonPlus Flatpak failed"
+  flatpak install -y flathub dev.vencord.Vesktop || warn "Vesktop Flatpak failed"
+  flatpak install -y flathub org.localsend.localsend_app || warn "LocalSend Flatpak failed"
+  flatpak install -y flathub com.github.tchx84.Flatseal || warn "Flatseal Flatpak failed"
+  
+  section "Set fish as shell for ${TARGET_USER}"
 if command -v fish &>/dev/null; then
   chsh -s "$(command -v fish)" "${TARGET_USER}" || true
 fi
