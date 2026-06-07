@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+LOGFILE="/tmp/phil-fed-boot.log"
+exec > >(tee -a "$LOGFILE")
+exec 2>&1
 # Phil's Fedora 44 KDE Minimal Bootstrap
 # Start from Fedora Everything -> Minimal Install -> TTY
 # Run with:
@@ -8,7 +11,7 @@ set -euo pipefail
 
 TARGET_USER="pmc"
 
-INSTALL_NVIDIA=false
+INSTALL_NVIDIA=true
 INSTALL_VIRT=true
 
 GREEN='\033[0;32m'
@@ -71,6 +74,8 @@ dnf -y install \
   kcalc \
   filelight \
   kscreen \
+  kwalletmanager5 \
+  pam-kwallet \
   plasma-nm \
   plasma-pa \
   bluedevil
