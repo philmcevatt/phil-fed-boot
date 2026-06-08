@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LOGFILE="/tmp/phil-fed-boot.log"
+LOGFILE="/var/log/phil-fed-boot.log"
 exec > >(tee -a "$LOGFILE")
 exec 2>&1
 # Phil's Fedora 44 KDE Minimal Bootstrap
