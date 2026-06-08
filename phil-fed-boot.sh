@@ -4,6 +4,7 @@ set -euo pipefail
 LOGFILE="/var/log/phil-fed-boot.log"
 exec > >(tee -a "$LOGFILE")
 exec 2>&1
+
 # Phil's Fedora 44 KDE Minimal Bootstrap
 # Start from Fedora Everything -> Minimal Install -> TTY
 # Run with:
@@ -13,6 +14,8 @@ TARGET_USER="pmc"
 
 INSTALL_NVIDIA=true
 INSTALL_VIRT=true
+FIX_GAMES_PERMISSIONS=true
+LABEL_BTRFS=true
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -73,6 +76,7 @@ dnf -y install \
   kolourpaint \
   kcalc \
   filelight \
+  spectacle \
   kscreen \
   kwalletmanager5 \
   pam-kwallet \
@@ -92,6 +96,9 @@ dnf -y install \
   NetworkManager-wifi \
   wpa_supplicant \
   linux-firmware \
+  iwlwifi-dvm-firmware \
+  iwlwifi-mvm-firmware \
+  iwlwifi-mld-firmware \
   bluez \
   bluez-tools
 
@@ -156,8 +163,30 @@ flatpak install -y flathub org.localsend.localsend_app || warn "LocalSend Flatpa
 flatpak install -y flathub com.github.tchx84.Flatseal || warn "Flatseal Flatpak failed"
 
 section "Set fish as shell for ${TARGET_USER}"
-if command -v fish &>/dev/null; then
-  chsh -s "$(command -v fish)" "${TARGET_USER}" || true
+if [[ -x /usr/bin/fish ]]; then
+  chsh -s /usr/bin/fish "${TARGET_USER}" || true
+fi
+
+if [[ "${FIX_GAMES_PERMISSIONS}" == "true" ]]; then
+  if mountpoint -q /games; then
+    section "Configure /games"
+    chown -R "${TARGET_USER}:${TARGET_USER}" /games
+    chmod 755 /games
+  else
+    warn "/games not mounted, skipping permissions fix"
+  fi
+fi
+
+if [[ "${LABEL_BTRFS}" == "true" ]]; then
+  section "Set Btrfs labels"
+
+  if mountpoint -q /games; then
+    btrfs filesystem label /games games || true
+  else
+    warn "/games not mounted, skipping /games label"
+  fi
+
+  btrfs filesystem label / fedora || true
 fi
 
 if [[ "${INSTALL_VIRT}" == "true" ]]; then
